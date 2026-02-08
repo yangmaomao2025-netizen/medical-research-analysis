@@ -42,6 +42,6 @@ async def root():
 async def health_check():
     return {"status": "healthy"}
 
-# 后续添加路由
-# from app.api.v1 import router as api_router
-# app.include_router(api_router, prefix="/api/v1")
+# 注册API路由
+from app.api.v1 import api_router
+app.include_router(api_router)
