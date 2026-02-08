@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+package-lock.json
+package.json
+
+# OpenClaw
+.clawhub/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Skills (auto-installed)
+skills/*/node_modules/
