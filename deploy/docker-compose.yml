@@ -1,0 +1,126 @@
+version: '3.8'
+
+services:
+  # PostgreSQL数据库
+  postgres:
+    image: postgres:15-alpine
+    container_name: mrp-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: medical_research
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - mrp-network
+
+  # Redis缓存
+  redis:
+    image: redis:7-alpine
+    container_name: mrp-redis
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - mrp-network
+
+  # RabbitMQ消息队列
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: mrp-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"  # 管理界面
+    networks:
+      - mrp-network
+
+  # Elasticsearch搜索引擎
+  elasticsearch:
+    image: elasticsearch:8.12.0
+    container_name: mrp-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    networks:
+      - mrp-network
+
+  # MinIO文件存储
+  minio:
+    image: minio/minio:latest
+    container_name: mrp-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"  # 控制台
+    networks:
+      - mrp-network
+
+  # 后端服务
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mrp-backend
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/medical_research
+      REDIS_URL: redis://redis:6379/0
+      RABBITMQ_URL: amqp://admin:admin@rabbitmq:5672/
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      MINIO_ENDPOINT: minio:9000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+      - elasticsearch
+      - minio
+    volumes:
+      - ./backend:/app
+    networks:
+      - mrp-network
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # 前端服务
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: mrp-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - mrp-network
+    command: npm run dev
+
+volumes:
+  postgres_data:
+  redis_data:
+  rabbitmq_data:
+  elasticsearch_data:
+  minio_data:
+
+networks:
+  mrp-network:
+    driver: bridge
