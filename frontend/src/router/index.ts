@@ -35,6 +35,12 @@ const routes = [
         name: 'Profile',
         component: () => import('@/views/profile/index.vue'),
         meta: { title: '个人中心', icon: 'UserFilled' }
+      },
+      {
+        path: '/ai-tools',
+        name: 'AITools',
+        component: () => import('@/views/ai-tools/index.vue'),
+        meta: { title: 'AI助手', icon: 'MagicStick' }
       }
     ]
   }
