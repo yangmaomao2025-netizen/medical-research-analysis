@@ -3,7 +3,7 @@ API路由聚合
 """
 from fastapi import APIRouter
 
-from app.api.v1 import auth, literature, user, project, ai, research
+from app.api.v1 import auth, literature, user, project, ai, research, writing
 
 api_router = APIRouter(prefix="/api/v1")
 
@@ -13,3 +13,4 @@ api_router.include_router(user.router)
 api_router.include_router(project.router)
 api_router.include_router(ai.router)
 api_router.include_router(research.router)
+api_router.include_router(writing.router)

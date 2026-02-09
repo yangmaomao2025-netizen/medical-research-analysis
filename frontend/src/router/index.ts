@@ -41,6 +41,12 @@ const routes = [
         name: 'AITools',
         component: () => import('@/views/ai-tools/index.vue'),
         meta: { title: 'AI助手', icon: 'MagicStick' }
+      },
+      {
+        path: '/writing',
+        name: 'Writing',
+        component: () => import('@/views/writing/index.vue'),
+        meta: { title: '论文写作', icon: 'EditPen' }
       }
     ]
   }
